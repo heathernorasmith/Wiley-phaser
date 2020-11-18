@@ -143,6 +143,7 @@ function update() {
   const isJumpJustDown = (Phaser.Input.Keyboard.JustDown('this.cursors.up',!)
   const touchingGround = this.playerbody.touching.down
 
+
   if (isJumpJustDown && (touchingGround || this.jumpCount < 2))
   {this.player.setVelocityY(-330)
 ++this.jumpCount}
