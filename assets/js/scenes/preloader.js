@@ -20,7 +20,7 @@ export default class Preloader extends Phaser.Scene {
 
     this.load.audio('grunt', 'assets/sound/grunt.wav');
     this.load.audio('woof', 'assets/sound/woof.mp3');
-    this.load.audio('home', 'assets/sound/home.m4a');
+  
 
     this.load.spritesheet('dude', 'assets/img/wiley.png', {
       frameWidth: 64,
