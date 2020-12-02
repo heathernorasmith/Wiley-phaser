@@ -16,7 +16,7 @@ export default class Game extends Phaser.Scene {
   create() {
     this.registry.set('score', this.score);
     this.add.image(400, 300, 'sky');
-    this.sound.play('home');
+
 
     // platforms
     this.platforms = this.physics.add.staticGroup();
@@ -193,20 +193,15 @@ export default class Game extends Phaser.Scene {
       null,
       this
     );
-    // this.physics.add.overlap(
-    //   this.player,
-    //   this.friend,
-    //   this.friendsTalk,
-    //   null,
-    //   this
-    // );
+
   }
 
   update() {
-    console.log(this.score, this.gameOver);
+
     if (this.gameOver) {
       return;
     }
+
 
     if (this.cursors.left.isDown) {
       this.player.setVelocityX(-160);
@@ -233,9 +228,7 @@ export default class Game extends Phaser.Scene {
     if (isTouchingGround && !isJumpJustDown && this.jumpCount > 2) {
       this.jumpCount = 0;
     }
-    // console.log(isTouchingGround, !isJumpJustDown, this.jumpCount);
 
-    // console.log(friend.body.velocity.x);
 
     if (this.friend.body.touching.right) {
       this.friend.anims.play('cat-left', true);
