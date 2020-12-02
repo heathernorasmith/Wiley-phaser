@@ -1,6 +1,12 @@
 export default class Game extends Phaser.Scene {
   constructor() {
     super('game');
+
+    this.FRIEND_SPEED = 80;
+    this.FLAG_SPEED = 1;
+    this.score = 0;
+    this.gameOver = false;
+    this.jumpCount = 0;
   }
 
   preload() {
@@ -8,34 +14,32 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    this.registry.set('score', this.score);
     this.add.image(400, 300, 'sky');
+    this.sound.play('home');
 
-    //platforms
-    platforms = this.physics.add.staticGroup();
+    // platforms
+    this.platforms = this.physics.add.staticGroup();
 
-    platforms.create(400, 572, 'groundfloor').setScale(1.2).refreshBody();
+    this.platforms.create(400, 572, 'groundfloor').setScale(1.2).refreshBody();
+    this.platforms.create(0, 200, 'ground').setScale(0.5).refreshBody();
+    this.platforms.create(400, 200, 'ground').setScale(0.5).refreshBody();
+    this.platforms.create(800, 200, 'ground').setScale(0.5).refreshBody();
+    this.platforms.create(725, 375, 'ground').setScale(0.5).refreshBody();
+    this.platforms.create(75, 375, 'ground').setScale(0.5).refreshBody();
+    this.platforms.create(400, 525, 'ground').setScale(0.75).refreshBody();
 
-    platforms.create(0, 200, 'ground').setScale(0.5).refreshBody();
-    platforms.create(400, 200, 'ground').setScale(0.5).refreshBody();
-    platforms.create(800, 200, 'ground').setScale(0.5).refreshBody();
+    // walls
 
-    platforms.create(725, 375, 'ground').setScale(0.5).refreshBody();
-    platforms.create(75, 375, 'ground').setScale(0.5).refreshBody();
-
-    platforms.create(400, 525, 'ground').setScale(0.75).refreshBody();
-
-    //wall
-
-    wall = this.physics.add.staticGroup();
-    wall.create(510, 440, 'wall').setScale(1).refreshBody();
-    wall.create(288, 440, 'wall').setScale(1).refreshBody();
+    this.walls = this.physics.add.staticGroup();
+    this.walls.create(510, 440, 'wall').setScale(1).refreshBody();
+    this.walls.create(288, 440, 'wall').setScale(1).refreshBody();
 
     // Player functions
+    this.player = this.physics.add.sprite(100, 450, 'dude');
 
-    player = this.physics.add.sprite(100, 450, 'dude');
-
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
+    this.player.setBounce(0.2);
+    this.player.setCollideWorldBounds(true);
 
     this.anims.create({
       key: 'left',
@@ -57,13 +61,11 @@ export default class Game extends Phaser.Scene {
       repeat: -1,
     });
 
-    cursors = this.input.keyboard.createCursorKeys();
-
     //friend cat
 
-    friend = this.physics.add.sprite(300, 450, 'cat');
-    friend.setBounce(0.2);
-    friend.setCollideWorldBounds(true);
+    this.friend = this.physics.add.sprite(300, 450, 'cat');
+    this.friend.setBounce(0.2);
+    this.friend.setCollideWorldBounds(true);
 
     this.anims.create({
       key: 'cat-left',
@@ -85,167 +87,223 @@ export default class Game extends Phaser.Scene {
       repeat: -1,
     });
 
-    friend.anims.play('cat-right', true);
+    this.friend.anims.play('cat-right', true);
 
-    friend.setVelocityX(FRIEND_SPEED);
+    this.friend.setVelocityX(this.FRIEND_SPEED);
 
-    //flag
-
-    flag = this.physics.add.sprite(775, 100, 'flag');
-    flag.setBounce(0.2);
-    flag.setCollideWorldBounds(true);
+    // flag
+    this.flag = this.physics.add.sprite(775, 100, 'flag');
+    this.flag.setBounce(0.2);
+    this.flag.setCollideWorldBounds(true);
 
     this.anims.create({
       key: 'flag-left',
       frames: this.anims.generateFrameNumbers('flag', { start: 0, end: 3 }),
-      frameRate: 10,
+      frameRate: 3,
       repeat: -1,
     });
 
     this.anims.create({
       key: 'flag-turn',
       frames: [{ key: 'flag', frame: 4 }],
-      frameRate: 10,
+      frameRate: 3,
     });
 
     this.anims.create({
       key: 'flag-right',
       frames: this.anims.generateFrameNumbers('flag', { start: 5, end: 8 }),
-      frameRate: 10,
+      frameRate: 3,
       repeat: -1,
     });
 
-    //friend catcus
+    this.flag.anims.play('flag-right', true);
 
-    cactus = this.physics.add.sprite(400, 100, 'cactus');
-    cactus.setBounce(0.2);
-    cactus.setCollideWorldBounds(true);
+    this.flag.setVelocityX(this.FLAG_SPEED);
 
-    //   this.anims.add({
-    //     key: 'cat-walk',
-    //     frames: this.anims.generateFrameNumbers('cat', { start: 5, end: 8,}),
-    //     frameRate: 20,
-
-    //   });
-    // this.anims.pla({
-    //   key: 'cat-walk',
-    //   frames: this.anims.generateFrameNumbers('cat', { start: 5, end: 8 }),
-    //   frameRate: 20,
-    // });
-
-    energy = this.physics.add.sprite(725, 400, 'bowl');
-    energy.setBounce(0.2);
-    energy.setCollideWorldBounds(true);
+    // friend catcus
+    this.cactus = this.physics.add.sprite(400, 100, 'cactus');
+    this.cactus.setBounce(0.2);
+    this.cactus.setCollideWorldBounds(true);
 
     /// Cookies
 
-    stars = this.physics.add.group({
-      key: 'star',
+    this.cookies = this.physics.add.group({
+      key: 'cookie',
       repeat: 11,
       setXY: { x: 12, y: 0, stepX: 70 },
     });
 
-    bees = this.physics.add.group({
+    this.bees = this.physics.add.group({
       key: 'bee',
-      repeat: 3,
-      setXY: { x: 200, y: 0, stepX: 200 },
+      repeat: 2,
+      setXY: { x: 100, y: 0, stepX: 400 },
     });
 
-    stars.children.iterate(function (child) {
+    this.cookies.children.iterate(function (child) {
       child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
     });
 
-    bees.children.iterate(function (child) {
+    this.bees.children.iterate(function (child) {
       child.setBounceY(Phaser.Math.FloatBetween(0.3, 0.3));
     });
 
-    scoreText = this.add.text(16, 16, 'Energy: 0', {
+    this.scoreText = this.add.text(16, 16, 'Energy: 0', {
       fontSize: '20px',
       fontFamily: 'Roboto',
       fill: '#000',
     });
 
-    this.physics.add.collider(player, platforms);
-    this.physics.add.collider(stars, platforms);
-    this.physics.add.collider(bees, platforms);
+    this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.cookies, this.platforms);
+    this.physics.add.collider(this.bees, this.platforms);
+    this.physics.add.collider(this.friend, this.platforms);
+    this.physics.add.collider(this.friend, this.player);
+    this.physics.add.collider(this.flag, this.platforms);
+    this.physics.add.collider(this.cactus, this.platforms);
 
-    this.physics.add.collider(friend, platforms);
-    this.physics.add.collider(friend, player);
-    this.physics.add.collider(flag, platforms);
-    this.physics.add.collider(cactus, platforms);
-    this.physics.add.collider(energy, platforms);
-    this.physics.add.collider(wall, friend);
+    this.physics.add.collider(this.walls, this.friend);
 
-    this.physics.add.overlap(player, stars, collectStar, null, this);
-    this.physics.add.overlap(player, bees, collectBee, null, this);
+    this.physics.add.overlap(
+      this.player,
+      this.cookies,
+      this.collectCookie,
+      null,
+      this
+    );
+    this.physics.add.overlap(
+      this.player,
+      this.bees,
+      this.collectBee,
+      null,
+      this
+    );
 
-    function collectStar(player, star) {
-      star.disableBody(true, true);
+    this.physics.add.overlap(
+      this.player,
+      this.cactus,
+      this.collectCactus,
+      null,
+      this
+    );
 
-      score += 10;
-      scoreText.setText('Energy: ' + score);
-      player.setTint();
-    }
-
-    function collectBee(player, bee) {
-      bee.disableBody(true, true);
-
-      score -= 10;
-      scoreText.setText('Energy: ' + score);
-      player.setTint(0xff0000);
-    }
-
-    function noEnergy() {
-      score = 0;
-      player.setTint(0xff0000);
-      player.anims.play('turn');
-      gameOver = true;
-      // need to set a timer
-    }
+    this.physics.add.overlap(
+      this.player,
+      this.flag,
+      this.collectFlag,
+      null,
+      this
+    );
+    // this.physics.add.overlap(
+    //   this.player,
+    //   this.friend,
+    //   this.friendsTalk,
+    //   null,
+    //   this
+    // );
   }
 
   update() {
-    if (gameOver) {
+    console.log(this.score, this.gameOver);
+    if (this.gameOver) {
       return;
     }
 
-    if (cursors.left.isDown) {
-      player.setVelocityX(-160);
+    if (this.cursors.left.isDown) {
+      this.player.setVelocityX(-160);
 
-      player.anims.play('left', true);
-    } else if (cursors.right.isDown) {
-      player.setVelocityX(160);
+      this.player.anims.play('left', true);
+    } else if (this.cursors.right.isDown) {
+      this.player.setVelocityX(160);
 
-      player.anims.play('right', true);
+      this.player.anims.play('right', true);
     } else {
-      player.setVelocityX(0);
+      this.player.setVelocityX(0);
 
-      player.anims.play('turn');
+      this.player.anims.play('turn');
     }
 
-    const isJumpJustDown = Phaser.Input.Keyboard.JustDown(cursors.up);
-    const isTouchingGround = player.body.touching.down;
+    const isJumpJustDown = Phaser.Input.Keyboard.JustDown(this.cursors.up);
+    const isTouchingGround = this.player.body.touching.down;
 
-    if (isJumpJustDown && (isTouchingGround || jumpCount < 2)) {
-      player.setVelocityY(-330);
-      jumpCount += 1;
+    if (isJumpJustDown && (isTouchingGround || this.jumpCount < 2)) {
+      this.player.setVelocityY(-330);
+      this.jumpCount += 1;
     }
 
-    if (isTouchingGround && !isJumpJustDown && jumpCount > 2) {
-      jumpCount = 0;
+    if (isTouchingGround && !isJumpJustDown && this.jumpCount > 2) {
+      this.jumpCount = 0;
     }
-    // console.log(isTouchingGround, !isJumpJustDown, jumpCount);
+    // console.log(isTouchingGround, !isJumpJustDown, this.jumpCount);
 
     // console.log(friend.body.velocity.x);
 
-    if (friend.body.touching.right) {
-      friend.anims.play('cat-left', true);
-      friend.setVelocityX(-FRIEND_SPEED);
+    if (this.friend.body.touching.right) {
+      this.friend.anims.play('cat-left', true);
+      this.friend.setVelocityX(-this.FRIEND_SPEED);
     }
 
-    if (friend.body.touching.left) {
-      friend.anims.play('cat-right', true);
-      friend.setVelocityX(FRIEND_SPEED);
+    if (this.friend.body.touching.left) {
+      this.friend.anims.play('cat-right', true);
+      this.friend.setVelocityX(this.FRIEND_SPEED);
     }
+
+    // Check for game over
+    if (this.score < 0) {
+      this.noEnergy();
+    }
+  }
+
+  collectCookie(player, cookie) {
+    cookie.disableBody(true, true);
+    this.score += 10;
+    this.scoreText.setText('Energy: ' + this.score);
+    this.registry.set('score', this.score);
+    player.setTint();
+    this.sound.play('grunt');
+  }
+
+  collectBee(player, bee) {
+    bee.disableBody(true, true);
+    this.score -= 10;
+    this.scoreText.setText('Energy: ' + this.score);
+    this.registry.set('score', this.score);
+    player.setTint();
+    this.sound.play('woof');
+    // this.game.sound.setDecodedCallback([this.woof], start, this);
+  }
+
+  // friendsTalk(player, friend) {
+  //   this.sound.play('woof', repeat (1));
+
+  // }
+
+  collectCactus(player, cactus) {
+    cactus.disableBody(true, true);
+    this.score -= 10;
+    this.scoreText.setText('Energy: ' + this.score);
+    this.registry.set('score', this.score);
+    player.setTint();
+    this.sound.play('woof');
+  }
+  noEnergy() {
+    this.friend.setVelocity(0, 0);
+    this.player.setVelocity(0, 0);
+    this.gameOver = true;
+
+    this.add.image(400, 300, 'gameover').setScale(1);
+
+    this.player.setTint(0xff0000);
+    this.player.anims.play('turn');
+  }
+
+  collectFlag(player, flag) {
+    this.player.setVelocityX(-160);
+    this.player.anims.play('left', true);
+    this.friend.anims.play('cat-right', true);
+    this.add.image(400, 300, 'won').setScale(1);
+    this.add.image(440, 458, 'trofey').setScale(1);
+    this.sound.play('woof');
+    this.gameOver = true;
+    this.scoreText.setText('Energy: ' + this.score);
   }
 }
