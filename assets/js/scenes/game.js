@@ -262,13 +262,9 @@ export default class Game extends Phaser.Scene {
     this.registry.set('score', this.score);
     player.setTint();
     this.sound.play('woof');
-    // this.game.sound.setDecodedCallback([this.woof], start, this);
+
   }
 
-  // friendsTalk(player, friend) {
-  //   this.sound.play('woof', repeat (1));
-
-  // }
 
   collectCactus(player, cactus) {
     cactus.disableBody(true, true);
