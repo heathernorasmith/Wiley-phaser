@@ -17,7 +17,6 @@ export default class Game extends Phaser.Scene {
     this.registry.set('score', this.score);
     this.add.image(400, 300, 'sky');
 
-
     // platforms
     this.platforms = this.physics.add.staticGroup();
 
@@ -30,7 +29,6 @@ export default class Game extends Phaser.Scene {
     this.platforms.create(400, 525, 'ground').setScale(0.75).refreshBody();
 
     // walls
-
     this.walls = this.physics.add.staticGroup();
     this.walls.create(510, 440, 'wall').setScale(1).refreshBody();
     this.walls.create(288, 440, 'wall').setScale(1).refreshBody();
@@ -61,8 +59,7 @@ export default class Game extends Phaser.Scene {
       repeat: -1,
     });
 
-    //friend cat
-
+    // friend cat
     this.friend = this.physics.add.sprite(300, 450, 'cat');
     this.friend.setBounce(0.2);
     this.friend.setCollideWorldBounds(true);
@@ -125,7 +122,7 @@ export default class Game extends Phaser.Scene {
     this.cactus.setBounce(0.2);
     this.cactus.setCollideWorldBounds(true);
 
-    /// Cookies
+    // Cookies
 
     this.cookies = this.physics.add.group({
       key: 'cookie',
@@ -170,6 +167,7 @@ export default class Game extends Phaser.Scene {
       null,
       this
     );
+    
     this.physics.add.overlap(
       this.player,
       this.bees,
@@ -193,15 +191,12 @@ export default class Game extends Phaser.Scene {
       null,
       this
     );
-
   }
 
   update() {
-
     if (this.gameOver) {
       return;
     }
-
 
     if (this.cursors.left.isDown) {
       this.player.setVelocityX(-160);
@@ -228,7 +223,6 @@ export default class Game extends Phaser.Scene {
     if (isTouchingGround && !isJumpJustDown && this.jumpCount > 2) {
       this.jumpCount = 0;
     }
-
 
     if (this.friend.body.touching.right) {
       this.friend.anims.play('cat-left', true);
@@ -262,9 +256,7 @@ export default class Game extends Phaser.Scene {
     this.registry.set('score', this.score);
     player.setTint();
     this.sound.play('woof');
-
   }
-
 
   collectCactus(player, cactus) {
     cactus.disableBody(true, true);
